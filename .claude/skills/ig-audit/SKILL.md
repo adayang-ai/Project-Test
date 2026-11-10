@@ -15,9 +15,41 @@ description: >-
 
 用 Windsor.ai 拉資料，不要請使用者貼截圖，除非 Windsor 拉不到。
 
-- 先呼叫 `get_connectors`。Instagram 帳號 id 是 `17841476264449345`（pmcareerlife）。
-- **Threads：** 如果 `get_connectors` 回傳裡有 `threads`，一併分析；沒有的話，
-  報告開頭寫明「Threads 未連接，本次只分析 IG」，並提醒使用者到 Windsor 連接。
+- 先呼叫 `get_connectors`。
+  - Instagram 帳號 id：`17841476264449345`（pmcareerlife）
+  - Threads 帳號 id：`29065839003068937`（pmcareerlife）
+- 任一平台沒出現在回傳裡，報告開頭寫明「某平台未連接」，並提醒使用者到 Windsor 重新連接。
+
+**Threads 是主力平台。** 追蹤者約為 IG 的 9 倍（2026/11 時 2,872 對 307），
+同一主題在 Threads 的觀看通常是 IG 的 5–10 倍。報告先寫 Threads，再寫 IG。
+
+### Threads 每篇貼文（connector `threads`，近 21 天）
+
+```
+post_id, post_timestamp, post_media_type, post_text, post_permalink,
+post_views, post_likes, post_replies, post_reposts, post_quotes, post_shares
+```
+
+- `post_media_type` 是 `REPOST_FACADE` 的是轉發別人的貼文，數據全是 0，排除。
+- Threads 沒有觸及（reach），比率一律用觀看當分母。
+
+### Threads 帳號（近 14 天）
+
+```
+date, profile_views
+```
+
+- `profile_views` 是每日時間序列，可以拆本週與前週比較。
+- `profile_likes`、`profile_replies`、`profile_reposts`、`profile_quotes` 只在最後一天有值，
+  不是每日數據，不要拿來做趨勢。
+- `profile_followers_count` 只回傳目前總數，沒有歷史。每週把數字記進 `log.md`，用來算週增減。
+
+### Threads 受眾（一次只能一種，分開呼叫，每次搭配 `profile_followers_count`）
+
+- `profile_followers_age`
+- `profile_followers_gender`
+- `profile_followers_country`
+- `profile_followers_city`
 
 ### 每篇貼文（connector `instagram`，日期範圍抓近 21 天，用來算中位數）
 
@@ -67,6 +99,25 @@ follower_count_1d, followers_count
 
 排名用爆款倍數與分享率加收藏率，不用觀看數。
 
+### Threads 指標
+
+| 指標 | 算法 | 代表什麼 |
+| --- | --- | --- |
+| **爆款倍數** | 觀看 ÷ 近 21 天 Threads 貼文觀看中位數 | 同上 |
+| **分享率** | 分享 ÷ 觀看 | 有人把貼文轉出去，是 Threads 擴散的主要動力 |
+| **轉發加引用** | 轉發 + 引用 | 有人願意掛自己名字轉出去 |
+| **按讚率** | 讚 ÷ 觀看 | 情緒共鳴。按讚高但分享低，代表是共鳴型內容，不是實用型 |
+| **回覆數** | 直接看 | 有沒有引發討論 |
+
+排名用爆款倍數加分享率。
+
+### 跨平台比較
+
+同一主題常會同時發 IG 和 Threads。把這些貼文配對，並排列出兩邊的觀看與分享，判斷：
+- 哪些主題只在 Threads 有效（例如長文、職能拆解）
+- 哪些主題兩邊都弱，下次就不要再做
+- Threads 有沒有成功把人帶到 IG、LINE 或報名頁
+
 **發文不滿 48 小時的貼文不納入排名**，另外列出「數據未穩定」。
 
 ## 找出規律
@@ -110,8 +161,14 @@ n 少於 5 時要明講「訊號弱，再觀察一週」，不要硬湊規律。
 ## 輸出（繁體中文）
 
 ```
-IG 週報  ·  11/3–11/9  ·  9 篇  ·  Reel 中位數 231 觀看（近 21 天）
-（Threads 未連接）
+IG／Threads 週報  ·  11/3–11/9
+
+THREADS  ·  8 篇  ·  中位數 2,456 觀看（近 21 天）
+  個人檔案瀏覽 28,269（前週 18,510，+53%）  追蹤者 2,872
+  前 5 名 ……
+  後 5 名 ……
+
+IG  ·  9 篇  ·  Reel 中位數 231 觀看（近 21 天）
 
 帳號
   觀看 5,830（前週 2,706，+115%）  新增追蹤 17（前週 7）  追蹤者 307
@@ -125,6 +182,10 @@ IG 週報  ·  11/3–11/9  ·  9 篇  ·  Reel 中位數 231 觀看（近 21 �
   ...
 
 數據未穩定（不滿 48 小時）
+  ...
+
+跨平台（同主題）
+  面試前三天    Threads 2,815  ·  IG 307
   ...
 
 數據說了什麼
