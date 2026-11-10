@@ -1,100 +1,104 @@
 ---
 name: ig-plan
 description: >-
-  Build the week on Instagram - what to post, which format, when, and who to
-  engage with. Use when the user says "plan my week", "what should I post",
-  "content calendar", "I have nothing to post about", or wants a posting
-  schedule and an engagement list.
+  規劃 @pmcareerlife（百萬PM養成所）下週的 IG／Threads 內容：發什麼、用什麼形式、什麼時候發、
+  跟誰互動。觸發情境：「規劃下週內容」、「下週要發什麼」、「內容日曆」、「沒東西可以發」、
+  「plan my week」，或每週排程在 /ig-audit 之後執行。
 ---
 
-# ig-plan
+# ig-plan（百萬PM養成所版）
 
-The control room. Everything else in this pack executes; this decides what gets
-executed. Run it once a week, on the same day.
+控制台。這份決定要做什麼。每週同一天執行，接在 `/ig-audit` 之後。
 
-## Input
+## 輸入
 
-If `~/.claude/instagram/voice.md`, `swipe.md` and `log.md` exist, read them.
-The swipe file is the user's own evidence from `/ig-viral` about which formulas
-are landing in their niche right now, and it outranks anything in this file.
-The log stops the plan repeating a theme from the last fortnight.
+依序讀取（都在 repo 的 `.claude/instagram/` 底下）：
 
-If they do not exist, ask for four things and write them down:
+1. **本週 `/ig-audit` 的結論。** 它是這個帳號自己的證據，優先於這份檔案的任何預設值。
+2. `voice.md`：語氣與用詞。
+3. `log.md`：近兩週已經發過的主題，避免重複。
 
-1. What the user sells, and to whom.
-2. The three or four themes they want to be known for.
-3. What actually happened this week: a client call, a number, a mistake, a
-   thing they built, an argument they had. This is where posts come from.
-4. Ten accounts worth being visible to.
+### 帳號背景（有變動時更新這段）
 
-## What to post
+- **帳號：** @pmcareerlife，品牌「百萬PM養成所」。
+- **賣什麼：** PM 轉職陪跑。
+- **導流資源：** YouTube 與 Podcast（每集 EP 編號）、官方 LINE（AI PM 面試 50 題）、直播。
+- **受眾：** 約 94% 台灣、約 59% 女性、25–44 歲約 88%。
+  想轉職成 PM 或準備 PM 面試的在職者。
+- **素材來源：** 陪跑學員的直播訪談（Amy、Ruta 等）、國外 PM 內容整理
+  （Lenny's Podcast、Aakash Gupta 等）、心理學研究、自己的轉職經驗。
 
-Four to five posts a week, and at least three of them Reels. Reels are the only
-format on Instagram that reliably reaches people who do not follow the account.
-Carousels go deep with the people who already do. Stories are daily and are
-planned separately.
+### 每週要問使用者的事（缺什麼才問）
 
-Mix across the week, never two of the same type back to back:
+1. 這週實際發生了什麼：新的學員成果、直播、新一集 Podcast、讀到的好內容、陪跑群組裡的問題。
+   貼文從這裡來。
+2. 下週有沒有固定檔期：直播、課程報名截止、回放到期日。
+3. 10 個想被看見的帳號（第一次執行時問，之後沿用）。
 
-| type | share | job |
-| --- | --- | --- |
-| **Proof** | 1 per week | something that happened, with a number. Reel. |
-| **Teach** | 1 to 2 per week | one thing the viewer can do today. Reel or carousel. |
-| **Opinion** | 1 per week | a position that could lose you followers. Reel. |
-| **Story** | 1 per fortnight | a scene with a cost. Reel. |
-| **Offer** | 1 per fortnight | what you sell, said plainly, no apology. Carousel or stories. |
+## 發什麼
 
-For each slot give: the theme, the specific angle from what actually happened
-this week, the format, and the hook formula number from `ig-reel/hooks.json`.
-Not a topic, an angle. "AI" is not a plan. "The proposal we lost because the
-draft had an em dash in it" is a Reel.
+目前節奏是一天 1–2 篇。維持這個量，除非 `/ig-audit` 顯示量多但每篇都很弱，
+那就減少篇數、提高品質。
 
-## When to post
+**Reel 至少占一半。** Reel 是唯一穩定推給非追蹤者的形式；輪播用來加深已追蹤者的信任和收藏。
 
-Post when the user's audience is awake and not at work. For most consumer
-audiences that is early evening local time; for a business audience, early
-morning.
+同一天不要排兩篇同類型。下週的類型組合：
 
-But say this plainly: **the hour matters far less than the first two seconds.**
-Instagram will keep showing a Reel for days if it performs, and will bury a
-well-timed one that does not. If the user is optimising posting times before
-their hooks work, they are polishing the wrong thing, and you should say so.
+| 類型 | 比例 | 用途 | 形式 |
+| --- | --- | --- | --- |
+| **實用教學** | 每週 2–3 篇 | 一個看完今天就能改的細節（履歷一行、面試一題、一句改寫） | Reel 或輪播 |
+| **學員成果** | 每週 1 篇 | 有具體數字的結果（offer 數、薪資漲幅） | Reel |
+| **觀點** | 每週 1 篇 | 一個可能有人不同意的立場（「耐操算不算優點」） | Reel |
+| **研究整理** | 每週 1 篇 | 心理學或國外 PM 內容，附出處、講清楚哪裡是研究、哪裡是個人經驗 | 輪播 |
+| **導流** | 每週最多 1–2 篇 | Podcast 新集、直播報名、LINE 資源 | **Reel 或輪播，不要用單圖** |
 
-Anchor times to the audience's timezone, not the user's, if those differ.
+單圖導流貼文過去觸及只有 28–91、互動接近 0，除非 `/ig-audit` 出現反例，否則不排。
 
-## The engagement round, which is not optional
+每個時段要寫出：類型、**具體切角**（不是主題）、形式、開頭類型、CTA。
+「履歷」不是計畫；「履歷 summary 第一行要寫總年資，Ruta 改完就有公司主動找」才是。
 
-20 minutes a day, before posting, not after. Build a list of 10:
+開頭類型沿用 `/ig-audit` 的分類：結果先行、具體數字、反直覺、直接提問、引述金句、情境鋪陳。
+優先用本週前 5 名貼文用的類型。
 
-- **5 reach** - accounts with an audience the user wants, where a good comment
-  gets seen. Comment early, before the thread is 200 deep.
-- **3 peers** - same size, same field. This is the group that reciprocates.
-- **2 buyers** - people who could actually buy. Comment for weeks before any
-  DM, and never pitch in a comment.
+## 什麼時候發
 
-Hand the list to `/ig-comment`.
+時間一律用台灣時間（Asia/Taipei）。目前常用時段：中午 12:00、傍晚 18:00、晚上 20:00。
 
-## Output
+但要說清楚：**發文時段的影響遠小於開頭前兩秒。** 表現好的 Reel 會被推好幾天，
+時段排得再準，開頭沒效也會被埋掉。開頭還沒穩定之前就在調時段，是在優化錯的地方，要直接講。
+
+## 規則
+
+- hashtag 最多 5 個（Instagram 2025 年 12 月起的上限）。
+- 每篇只放一個 CTA。
+- 動態牆在「…更多」前只顯示約 125 字，第一句要能獨立成立。
+- **不捏造數字、學員或成果。** 需要使用者提供的數字一律寫 `{{數字}}` 並標註。
+- 引用研究或國外內容要附出處；個人經驗和研究結論要分開講。
+- 這份只產出計畫，不排程、不發文。發文由使用者自己執行。
+
+## 互動清單（每天 20 分鐘，發文前做）
+
+10 個帳號：
+- **5 個擴散型：** 受眾是你想要的人（職涯、PM、科技業求職帳號），早點留言，趕在留言區變長之前。
+- **3 個同儕：** 規模差不多、同領域，最容易互相回應。
+- **2 個潛在學員：** 可能會買陪跑的人。持續留言幾週再私訊，不要在留言裡推銷。
+
+## 輸出（繁體中文）
 
 ```
-WEEK OF SEP 15
+下週內容規劃  ·  11/11–11/17
 
-MON  engage only  (20 min, list below)
-TUE  7:30pm  REEL      PROOF    #5  Time Collapse   - 5hr proposal to 20 min
-WED  stories only + engage
-THU  7:00pm  CAROUSEL  TEACH    Job B caption       - the 4-slide clause breakdown
-FRI  7:30pm  REEL      OPINION  #2  Negative Command - stop doing discovery calls
-SAT  -
-SUN  6:00pm  REEL      STORY    #21 Mid-Sentence    - the refund email
+根據本週 audit：多做「結果先行的實用教學 Reel」，停止單圖導流。
 
-STORIES  every day, 3 to 5 frames, question box on Thursday.
+二 11/11  20:00  REEL   實用教學  結果先行  履歷系列 #2：經歷怎麼寫成成果，附改寫前後對照
+                         CTA：留言「履歷」領模板
+三 11/12  12:00  輪播   研究整理  ……
+...
 
-ENGAGE  (5 reach / 3 peers / 2 buyers)
+互動清單（5 擴散 / 3 同儕 / 2 潛在學員）
   ...
 
-Say "write Tuesday" and I will draft it.
+說「寫週二那篇」，我就幫你寫文案。
 ```
 
-Write the plan to `~/.claude/instagram/plan.md` so the other skills can read
-it. Nothing is scheduled or posted anywhere. This is a plan and the user runs
-it.
+把計畫寫到 `.claude/instagram/plan.md`（覆蓋上一週），並在 `log.md` 本週那一列註記已產出規劃。

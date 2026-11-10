@@ -1,104 +1,138 @@
 ---
 name: ig-audit
 description: >-
-  Post-mortem on what the user has already posted - which reels actually
-  worked, why, and what to stop making. Use when the user pastes their
-  Instagram insights or past posts and asks "what's working", "why did this
-  flop", "read my analytics", "audit my content", or wants to know what to do
-  more of.
+  @pmcareerlife（百萬PM養成所）的每週 IG／Threads 貼文成效檢討：哪些貼文真的有效、為什麼、
+  哪些該停。觸發情境：「分析這週貼文」、「IG 週報」、「哪篇有效」、「為什麼這篇沒流量」、
+  「audit my content」、「what's working」，或每週排程的流量受眾分析。
 ---
 
-# ig-audit
+# ig-audit（百萬PM養成所版）
 
-The only honest source of what works for an account is that account. Every
-rule in every Instagram guide, including the ones in this pack, is a prior.
-The user's own last 30 posts are the evidence.
+帳號自己的貼文才是唯一可信的證據。任何經營指南（包含這份）都只是預設值，
+有數據時以數據為準。
 
-## Input
+## 資料來源
 
-Ask for whichever the user has:
+用 Windsor.ai 拉資料，不要請使用者貼截圖，除非 Windsor 拉不到。
 
-- Insights per post: views, reach, interactions, watch time, saves, shares,
-  follows, and the non-follower share of reach. Screenshots are fine.
-- Or the retention graph for their best and worst recent reels. This one
-  screenshot is worth more than the rest combined.
-- Or just the posts and their view counts, which is enough for a first pass.
+- 先呼叫 `get_connectors`。Instagram 帳號 id 是 `17841476264449345`（pmcareerlife）。
+- **Threads：** 如果 `get_connectors` 回傳裡有 `threads`，一併分析；沒有的話，
+  報告開頭寫明「Threads 未連接，本次只分析 IG」，並提醒使用者到 Windsor 連接。
 
-Also read `~/.claude/instagram/log.md` if it exists, since it records which
-hook formula each post used.
+### 每篇貼文（connector `instagram`，日期範圍抓近 21 天，用來算中位數）
 
-## What to actually measure
+```
+media_id, timestamp, media_type, media_caption, media_permalink,
+media_views, media_reach, media_like_count, media_comments_count,
+media_saved, media_shares, media_follows, media_profile_visits
+```
 
-Raw views is the least useful number on the page, because it is mostly a
-function of how many people already follow the account. Compute these instead
-and show the working:
+Reel 另外試抓 `media_reel_avg_watch_time`、`media_reel_skip_rate`。如果報錯就拿掉，不要卡住。
 
-| metric | how | what it tells you |
+已知限制：
+- `media_reposts` 不支援（帳號用 Instagram Login 連接），不要放進欄位。
+- Reel 的 `media_follows`、`media_profile_visits` 一律是 null，不要當成 0。
+
+### 帳號每日（近 14 天，拆成本週與前週）
+
+```
+date, views, reach_1d, reach_followers, reach_non_followers,
+views_followers, views_non_followers, total_interactions,
+follower_count_1d, followers_count
+```
+
+`followers_count` 只有今天有值。
+
+### 受眾（每次只能一種 breakdown，分開呼叫）
+
+- `audience_gender_age_name, audience_gender_age_size`
+- `audience_country_name, audience_country_size`
+- `city, audience_city_size`
+
+受眾和上週差不多時，一句帶過就好，不要每週重講。
+
+## 要算的指標
+
+原始觀看數最沒參考價值，它主要反映追蹤者多寡。改算以下指標，並列出算式：
+
+| 指標 | 算法 | 代表什麼 |
 | --- | --- | --- |
-| **Outlier multiple** | views / the account's own median views | whether this was a real hit or a normal day |
-| **Non-follower reach** | % of reach from people who do not follow | whether it travelled at all |
-| **Hold at 3s** | viewers still there at 3s / viewers who started | whether the hook worked. This is the hook's grade. |
-| **Average watch time** | straight from insights | whether the middle worked |
-| **Sends per reach** | shares / reach | the strongest single signal you can earn. A send is a person putting their name on it. |
-| **Follows per reach** | follows / reach | whether the profile converted the attention |
+| **爆款倍數** | 觀看 ÷ 近 21 天同形式貼文的觀看中位數 | 真的爆了，還是普通的一天。Reel、輪播、單圖分開算中位數 |
+| **分享率** | 分享 ÷ 觸及 | 最強的單一訊號。分享代表有人願意把你的內容轉給別人 |
+| **收藏率** | 收藏 ÷ 觸及 | 這個帳號的教學內容主要靠收藏，跟分享率並列 |
+| **非追蹤者占比** | 當日 `reach_non_followers` ÷ `reach_1d` | 有沒有推出圈。只有帳號層級數據，以發文當天做近似值，要註明 |
+| **略過率** | `media_reel_skip_rate`（3 秒內滑走的比例） | 開頭有沒有效。拉得到才用 |
+| **平均觀看秒數** | `media_reel_avg_watch_time` ÷ 1000 | 中段有沒有留住人。拉得到才用 |
+| **追蹤轉換** | 本週新增追蹤 ÷ 本週觸及（帳號層級） | 注意力有沒有變成追蹤 |
 
-Rank by outlier multiple and sends per reach, not views. A reel with 4,000
-views and 90 sends beat the one with 60,000 views and 11.
+排名用爆款倍數與分享率加收藏率，不用觀看數。
 
-## Then find the pattern
+**發文不滿 48 小時的貼文不納入排名**，另外列出「數據未穩定」。
 
-With the top five and bottom five side by side, look for what separates them,
-and be willing to conclude something the user will not like:
+## 找出規律
 
-- **Hold at 3 seconds.** If the top and bottom differ here, it is the hook and
-  nothing else, and everything downstream is a distraction.
-- **Hook formula.** Which ids from `ig-reel/hooks.json` are in the top five?
-- **Format.** Reel, carousel, single image.
-- **Length.** Group into under 15s, 15 to 30s, 30 to 60s, over 60s.
-- **Theme.**
-- **Whether the user replied to comments in the first hour.**
-- **Day and time.** Check this **last** and only if the others show nothing.
-  It is almost never the cause and it is where people want it to be.
+把前 5 名和後 5 名並排，找出差異，有證據時也要願意說出使用者不想聽的結論。依序檢查：
 
-State the finding as a claim with the evidence attached, and say how confident
-it is. With 30 posts you can see a pattern. With 6 you cannot, and saying so is
-better than inventing one.
+1. **開頭類型。** 用下列分類標記每篇的第一句：
+   - 結果先行（「改了這一行，就有公司主動來問」）
+   - 具體數字（「4 個 offer」、「漲幅 60%」）
+   - 反直覺或打破迷思（「別再找資料了」）
+   - 直接提問（「35 歲以上找工作，機會真的比較少嗎？」）
+   - 引述金句（「你不要停下來，但是你可以走慢一點」）
+   - 情境鋪陳（「想換工作的念頭，放了快一年」）
+2. **內容主軸。** 履歷與求職文件／面試技巧／AI PM／學員故事（Amy、Ruta 等）／
+   職場溝通與心理學研究／硬體 PM／Podcast 或直播導流。
+3. **形式。** Reel、輪播、單圖。
+4. **是不是「看完可以直接照做」。** 有沒有具體改法或範例句。
+5. **CTA 類型。** 私訊「陪跑」／留言關鍵字領資源／留言分享經驗。
+6. **有沒有在第一小時回留言。**
+7. **發文時段**（台灣時間）。**最後才看**，前面都看不出差異時才拿來解釋，
+   它幾乎從來不是主因。
 
-## The distinction that saves people months
+結論要寫成「主張加證據」，並說明信心程度。週報通常只有 10–20 篇，樣本小，
+n 少於 5 時要明講「訊號弱，再觀察一週」，不要硬湊規律。
 
-**A reel that gets views and no follows is not a failed reel, it is a profile
-problem.** A reel that gets no views is a hook problem. Separate the two before
-recommending anything. If non-follower reach is high and follows per reach is
-low, stop rewriting hooks and go to `/ig-profile`.
+## 區分兩種問題
 
-## Output
+**有觸及但沒有追蹤，不是內容失敗，是個人檔案或 CTA 問題。**
+**沒有觸及，是開頭問題。**
+先分清楚再給建議。非追蹤者占比高但追蹤轉換低時，停止改開頭，改去檢查個人檔案、
+置頂貼文和簡介連結。
+
+## 與前幾週比較
+
+讀 `.claude/instagram/log.md`（在 repo 裡，會跟著 commit 保存）。它記錄每週的核心數字和結論。
+- 比較本週與前一週：觀看、觸及、非追蹤者占比、新增追蹤、追蹤者總數。
+- 檢查上週的「下週規劃」有沒有執行，以及執行的貼文表現如何。
+
+分析完把本週一列加進 `log.md`，格式照檔案裡的範例。
+
+## 輸出（繁體中文）
 
 ```
-AUDIT  ·  31 posts  ·  Jun 12 - Sep 5  ·  median views 4,100
+IG 週報  ·  11/3–11/9  ·  9 篇  ·  Reel 中位數 231 觀看（近 21 天）
+（Threads 未連接）
 
-TOP 5 BY OUTLIER MULTIPLE
-  18.2x  #3  Nobody Tells You   74,600 views  62% non-follower  hold@3s 71%  128 sends
-   6.4x  #1  Cost Confession    26,300 views  48% non-follower  hold@3s 64%   71 sends
+帳號
+  觀看 5,830（前週 2,706，+115%）  新增追蹤 17（前週 7）  追蹤者 307
+  非追蹤者占觸及 約 80%
+
+前 5 名（依爆款倍數）
+  13.5x  Reel  履歷總年資   3,124 觀看  分享率 0.48%  收藏率 1.47%  結果先行
   ...
 
-BOTTOM 5
-   0.3x  #11 Numbered            1,200 views  9% non-follower   hold@3s 31%    2 sends
+後 5 名
   ...
 
-WHAT THE DATA SAYS
-1. Hold at 3 seconds is the whole story. Top five average 66%, bottom five 33%.
-   Everything else you are worried about is downstream of the first two seconds.
-2. The posts where you were the one who looked bad: mean 8.1x vs 0.9x for
-   everything else. n=5. Strongest signal here and it is not close.
-3. Tool listicles get views and nothing else. High reach, no sends, no follows.
-   Three of your bottom five.
-4. Day of week shows nothing. Your Tuesday and Friday means are inside the
-   noise. Stop optimising it.
+數據未穩定（不滿 48 小時）
+  ...
 
-STOP: listicles.
-DO MORE: the ones with a cost you paid and a number attached.
+數據說了什麼
+1. ……（主張，證據，信心：高／中／低）
+2. ……
+
+停止：……
+多做：……
 ```
 
-Then hand the conclusions to `/ig-plan` so next week is built on the user's own
-evidence rather than on defaults, and to `/ig-viral` so the swipe file gets
-filtered to the formulas that work for this account specifically.
+最後把結論交給 `/ig-plan`，讓下週規劃根據這個帳號自己的證據，而不是預設值。
